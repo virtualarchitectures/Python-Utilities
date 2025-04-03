@@ -2,6 +2,7 @@ import requests
 import csv
 import argparse
 
+
 def fetch_commits(owner, repo, branch, token, csv_file):
     """Fetch GitHub commits and save them to a CSV file."""
     url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={branch}"
@@ -27,14 +28,21 @@ def fetch_commits(owner, repo, branch, token, csv_file):
     else:
         print("Failed to retrieve commits:", response.status_code, response.json())
 
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Fetch GitHub commits and save to CSV")
     parser.add_argument("--owner", required=True, help="GitHub repository owner")
     parser.add_argument("--repo", required=True, help="GitHub repository name")
     parser.add_argument("--branch", default="main", help="Branch name (default: main)")
-    parser.add_argument("--token", default=None, help="GitHub personal access token (optional)")
-    parser.add_argument("--output", default="github_commits.csv", help="Output CSV file (default: github_commits.csv)")
+    parser.add_argument(
+        "--token", default=None, help="GitHub personal access token (optional)"
+    )
+    parser.add_argument(
+        "--output",
+        default="github_commits.csv",
+        help="Output CSV file (default: github_commits.csv)",
+    )
 
     args = parser.parse_args()
-    
+
     fetch_commits(args.owner, args.repo, args.branch, args.token, args.output)
