@@ -3,21 +3,34 @@ import csv
 import argparse
 
 
-def fetch_commits(owner, repo, branch, token, csv_file):
+def fetch_commits(owner, repo, branch, token, csv_file, per_page=100):
     """Fetch GitHub commits and save them to a CSV file."""
-    url = f"https://api.github.com/repos/{owner}/{repo}/commits?sha={branch}"
+    base_url = f"https://api.github.com/repos/{owner}/{repo}/commits"
     headers = {"Authorization": f"token {token}"} if token else {}
+    params = {"sha": branch, "per_page": per_page}
+    all_commits = []
 
-    response = requests.get(url, headers=headers)
+    page = 1
+    while True:
+        params["page"] = page
+        response = requests.get(base_url, headers=headers, params=params)
 
-    if response.status_code == 200:
-        commits = response.json()
+        if response.status_code == 200:
+            commits = response.json()
+            if not commits:
+                break
+            all_commits.extend(commits)
+            page += 1
+        else:
+            print("Failed to retrieve commits:", response.status_code, response.json())
+            break
 
+    if all_commits:
         with open(csv_file, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
             writer.writerow(["SHA", "Date", "Author", "Summary", "Description"])
 
-            for commit in commits:
+            for commit in all_commits:
                 sha = commit["sha"]
                 message = commit["commit"]["message"]
                 author = commit["commit"]["author"]["name"]
@@ -30,9 +43,7 @@ def fetch_commits(owner, repo, branch, token, csv_file):
 
                 writer.writerow([sha, date, author, summary, description])
 
-        print(f"Saved {len(commits)} commits to {csv_file}")
-    else:
-        print("Failed to retrieve commits:", response.status_code, response.json())
+        print(f"Saved {len(all_commits)} commits to {csv_file}")
 
 
 if __name__ == "__main__":
