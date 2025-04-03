@@ -15,14 +15,20 @@ def fetch_commits(owner, repo, branch, token, csv_file):
 
         with open(csv_file, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)
-            writer.writerow(["SHA", "Date", "Author", "Message"])
+            writer.writerow(["SHA", "Date", "Author", "Summary", "Description"])
 
             for commit in commits:
                 sha = commit["sha"]
                 message = commit["commit"]["message"]
                 author = commit["commit"]["author"]["name"]
                 date = commit["commit"]["author"]["date"]
-                writer.writerow([sha, date, author, message])
+
+                # Split the message into summary and description
+                message_parts = message.split("\n", 1)
+                summary = message_parts[0].strip()
+                description = message_parts[1].strip() if len(message_parts) > 1 else ""
+
+                writer.writerow([sha, date, author, summary, description])
 
         print(f"Saved {len(commits)} commits to {csv_file}")
     else:
