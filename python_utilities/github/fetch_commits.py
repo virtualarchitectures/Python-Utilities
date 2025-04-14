@@ -39,7 +39,11 @@ def fetch_commits(owner, repo, branch, token, csv_file, per_page=100):
                 # Split the message into summary and description
                 message_parts = message.split("\n", 1)
                 summary = message_parts[0].strip()
-                description = message_parts[1].strip() if len(message_parts) > 1 else ""
+                description = (
+                    message_parts[1].replace("\n", " ").strip()
+                    if len(message_parts) > 1
+                    else ""
+                )
 
                 writer.writerow([sha, date, author, summary, description])
 
